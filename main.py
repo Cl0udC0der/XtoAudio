@@ -1,29 +1,57 @@
-import this
+from book_reader import BookReader
+import os
+import time
 
-import pyttsx4
-import PyPDF2
+def check_selection() -> None:
+    directory_path = "input"
+    if os.path.isdir(directory_path):
+        print(f"Directory '/{directory_path}' exists!")
 
+    else:
+        print(f"Directory '/{directory_path}' does not exist!")
+        print("Creating now...")
+        os.mkdir("input")
+    print("")
 
-class BookReader:
-    def __init__ (self, file: str = "") -> None:
-        this.file = file
-        this.total_pages = 0
+def print_selection(selection: list[str]):
+    if len(selection) == 0:
+        print("No files to read.")
+        return
 
-    def scan_book(self, file_name: str = "./input/Indistractible(Nir Eyal).pdf") -> None:
-        with open(file_name, "rb") as file:
-            pdf_reader = PyPDF2.PdfReader(file)
-            this.total_pages = len(pdf_reader.pages)
-            speaker = pyttsx4.init()
-            page = pdf_reader.pages[20]
-            text = page.extract_text()
-            speaker.say(text)
-            speaker.runAndWait()
-
-    def set_file(self, file_name: str) -> None:
-        this.file = file_name
-
+    print("Current Options: ")
+    for index, item in enumerate(selection):
+        print(f"{index + 1}. {item}")
+    print("")
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    nir_eyal = BookReader()
-    nir_eyal.scan_book()
+    active: bool = True
+
+    check_selection()
+    while active:
+        book_selection = [item for index, item in enumerate(os.listdir("input"))]
+        print_selection(book_selection)
+
+        selected = input(f"What would you like to read? Choose the number: ")
+        if selected.isnumeric() and int(selected) < len(book_selection) + 1:
+            current_book = BookReader()
+            current_book.set_file(os.getcwd() + "/input/" + book_selection[int(selected) - 1])
+            print("/input/" + book_selection[int(selected) - 1])
+            current_book.setup()
+            print(f"Selected {book_selection[int(selected) -1]} ({current_book.total_pages} pages)")
+
+            try_pages: bool = True
+
+            page_start = int(input(f"Input the starting page: "))
+            page_end = int(input(f"Input the ending page: "))
+            current_book.read(page_start, page_end)
+
+        elif selected == "break":
+            break
+
+        else:
+            print("_________________________")
+            print("Invalid input. Try again.")
+            print("_________________________ \n")
+        print("\n \n \n")
+        time.sleep(1)
