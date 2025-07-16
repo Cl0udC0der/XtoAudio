@@ -25,11 +25,6 @@ def check_output() -> None:
         os.mkdir("audio")
     print("")
 
-# def compare_audio() -> bool:
-#     directory_path = f'{os.getcwd()}/audio/'
-#     if os.path.isdir(directory_path):
-#
-
 def print_selection(selection: list[str]):
     if len(selection) == 0:
         print("No files to read.")
@@ -53,49 +48,28 @@ if __name__ == '__main__':
         print("3. Make dummy audio.")
         print("4. Exit")
         print("")
-        menu1 = int(input("What would you like to do? Choose number: "))
+        action_choice = input("What would you like to do? Choose number: ")
         print("")
-        # Read a PDf
-        if menu1 == 1:
-            book_selection = [item for index, item in enumerate(os.listdir("input"))]
-            print_selection(book_selection)
-            selected = input(f"What would you like to read? Choose the number: ")
 
-            if selected.isnumeric() and int(selected) < len(book_selection) + 1:
-                current_book = BookReader()
-                current_book.set_file(os.getcwd() + "/input/" + book_selection[int(selected) - 1])
-                current_book.setup()
-                print(f"Selected {book_selection[int(selected) -1]} ({current_book.total_pages} pages)")
 
-                try_pages: bool = True
-
-                page_start = int(input(f"Input the starting page: "))
-                page_end = int(input(f"Input the ending page: "))
-                current_book.read(page_start, page_end)
-
-            elif selected == "break":
-                break
-
-            else:
-                print("_________________________")
-                print("Invalid input. Try again.")
-                print("_________________________ \n")
-            print("\n \n \n")
-
-        # Listen to Audio
-        elif menu1 == 2:
-            make_sound = True
-
-            while make_sound:
-                audio_selection = [item for index, item in enumerate(os.listdir("audio"))]
-                print_selection(audio_selection)
+        match action_choice:
+            # Read a PDf
+            case '1':
+                book_selection = [item for index, item in enumerate(os.listdir("input"))]
+                print_selection(book_selection)
                 selected = input(f"What would you like to read? Choose the number: ")
 
+                if selected.isnumeric() and int(selected) < len(book_selection) + 1:
+                    current_book = BookReader()
+                    current_book.set_file(os.getcwd() + "/input/" + book_selection[int(selected) - 1])
+                    current_book.setup()
+                    print(f"Selected {book_selection[int(selected) -1]} ({current_book.total_pages} pages)")
 
-                if selected.isnumeric() and int(selected) < len(audio_selection) + 1:
-                    print(f"Selected {audio_selection[int(selected) - 1]}")
-                    speaker = VoicePlayer(os.getenv("ELEVENLABS_API_KEY"))
-                    speaker.play_audio(f"{os.getcwd()}/input/{audio_selection[int(selected) - 1]}.mp3")
+                    try_pages: bool = True
+
+                    page_start = int(input(f"Input the starting page: "))
+                    page_end = int(input(f"Input the ending page: "))
+                    current_book.read(page_start, page_end)
 
                 elif selected == "break":
                     break
@@ -106,13 +80,38 @@ if __name__ == '__main__':
                     print("_________________________ \n")
                 print("\n \n \n")
 
-        #Make dummy audio
-        elif menu1 == 3:
-            speaker = VoicePlayer(os.getenv("ELEVENLABS_API_KEY"))
-            audio = speaker.make_dummy_audio()
-            speaker.play_byte_audio(audio)
-            path = speaker.save_audio(audio)
-            print(f"Dummy made at {path}")
+            # Listen to Audio
+            case '2':
+                make_sound = True
+                while make_sound:
+                    audio_selection = [item for index, item in enumerate(os.listdir("audio"))]
+                    print_selection(audio_selection)
+                    selected = input(f"What would you like to read? Choose the number: ")
 
-        #exit
-        else: break
+
+                    if selected.isnumeric() and int(selected) < len(audio_selection) + 1:
+                        print(f"Selected {audio_selection[int(selected) - 1]}")
+                        speaker = VoicePlayer(os.getenv("ELEVENLABS_API_KEY"))
+                        speaker.play_recorded(f"{os.getcwd()}/input/{audio_selection[int(selected) - 1]}.mp3")
+
+                    elif selected == "break":
+                        break
+
+                    else:
+                        print("_________________________")
+                        print("Invalid input. Try again.")
+                        print("_________________________ \n")
+                    print("\n \n \n")
+
+            # Make dummy audio
+            case '3':
+                content = input("What do you want to turn to audio?\n ")
+                speaker = VoicePlayer(os.getenv("ELEVENLABS_API_KEY"))
+                audio = speaker.make_audio(content)
+                path = speaker.save_audio(audio)
+                speaker.play_recorded(path)
+                print(f"Dummy made at {path}")
+
+            #exit
+            case _:
+                break
